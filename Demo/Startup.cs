@@ -1,5 +1,7 @@
-﻿using Http.HTTP;
+﻿using Demo.Controllers;
+using Http.HTTP;
 using Http.Responses;
+using Http.Routing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,14 +26,14 @@ namespace Http
 
         private const string FileName = "content.txt";
 
-      /*  private const string LoginForm = @"<form action='/Login' method='POST'>
+        private const string LoginForm = @"<form action='/Login' method='POST'>
                                            Username: <input type='text' name='Username'/>
                                            Password: <input type='text' name='Pasword'/>
                                            <input type='submit' value='Log In'/>
                                            </form>";
 
         private const string Username = "user";
-        private const string Password = "user123";*/
+        private const string Password = "user123";
         private static async Task<string> DownloadWebSiteContent(string url)
         {
             var httpClient= new HttpClient();
@@ -58,19 +60,20 @@ namespace Http
 
         public static async Task Main()
         {
-            await DownloadSitesAsTextFile(Startup.FileName, new string[] { "https://judge.softuni.org/", "https://softuni.org/" });
-            var server = new HttpServer(routes => routes
-                .MapGet("/", new TextResponse("Hello from the server!"))
-                .MapGet("/Redirect", new RedirectResponse("https://softuni.org/"))
-                .MapGet("/HTML", new HtmlResponse(Startup.HtmlForm))
-                .MapPost("/HTML", new TextResponse("", Startup.AddFormDataAction))
-                .MapGet("/Content", new HtmlResponse(Startup.DownloadForm))
-                .MapGet("/Cookies", new HtmlResponse("", Startup.AddCookiesAction))
-                .MapPost("/Content", new TextFileResponse(Startup.FileName))
-                .MapGet("/Session",new TextResponse("",Startup.DisplaySessionInfoAction))
-                .MapGet("/PreRender", new TextResponse("I prerendered!", (r1, r2) => Console.WriteLine("I prerendered!")))); 
-
-            await server.Start();
+           
+           await new HttpServer(routes => routes
+                .MapGet<HomeController>("/", c => c.Index())
+                /*.MapGet<HomeController>("/Redirect", c => c.Redirect())
+                .MapGet<HomeController>("/HTML", c => c.Html())
+                .MapPost<HomeController>("/HTML", c => c.HtmlFormPost())
+                .MapGet<HomeController>("/Content", c => c.Content())
+                .MapGet<HomeController>("/Cookies", c => c.DownloadContent())
+                .MapPost<HomeController>("/Content", c => c.Cookies())
+                .MapGet<HomeController>("/Session",c => c.Session())*/
+                /*.MapGet<HomeController>("/Login", new HtmlResponse(Startup.LoginForm))
+                .MapPost<HomeController>("/Login",new HtmlResponse("", Startup.LoginAction))
+                .MapGet<HomeController>("/Logout", new HtmlResponse("", Startup.LogoutAction))
+                .MapGet<HomeController>("/UserProfile", new HtmlResponse("", Startup.GetUserDataAction))*/).Start();
         }
 
         private static void AddFormDataAction(Request request, Response response)
@@ -137,6 +140,53 @@ namespace Http
             }
             response.Body = "";
             response.Body += bodyText;
+        }
+
+        private static void LoginAction(Request request, Response response)
+        {
+            request.Session.Clear();
+
+            var bodyText = "";
+
+            var usernameMatches = request.Form["Username"] == Startup.Username;
+            var passwordMatches = request.Form["Pasword"] == Startup.Password;
+
+            if (usernameMatches && passwordMatches)
+            {
+                request.Session[Session.SessionUserKey] = "MyUserId";
+                response.Cookies.Add(Session.SessionCookieName,request.Session.Id);
+
+                bodyText = "<h3>Login successfully!</h3>";
+            }
+            else
+            {
+                bodyText = Startup.LoginForm;
+            }
+            response.Body = "";
+            response.Body += bodyText;
+        }
+
+        private static void LogoutAction(Request request, Response response)
+        {
+            request.Session.Clear();
+            response.Body = "";
+            response.Body += "<h3>Logouted successfully!</h3>";
+        }
+
+        private static void GetUserDataAction(Request request, Response response)
+        {
+            if (request.Session.ContainsKey(Session.SessionUserKey))
+            {
+                response.Body = "";
+                response.Body += $"<h3>Currently logged-in user "+
+                    $"is with username '{Username}'</h3>";
+            }
+            else
+            {
+                response.Body = "";
+                response.Body +="<h3>You should first log in "+
+                    "-<a href='/Login'>Login</a></h3>";
+            }
         }
 
     }

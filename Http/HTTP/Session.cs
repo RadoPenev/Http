@@ -11,6 +11,7 @@ namespace Http.HTTP
     {
         public const string SessionCookieName = "MyWebServerSID";
         public const string SessionCurrentDateKey = "CurrentDate";
+        public const string SessionUserKey = "AuthenticatedUserId";
 
         public string Id { get; set; }
 
@@ -32,5 +33,6 @@ namespace Http.HTTP
         public bool ContainsKey(string key)
             =>data.ContainsKey(key);
 
+        public void Clear()=>this.data.Clear();
     }
 }
