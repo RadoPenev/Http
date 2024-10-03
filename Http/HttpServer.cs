@@ -1,13 +1,8 @@
 ﻿using Http.HTTP;
 using Http.Routing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Http
 {
@@ -43,11 +38,11 @@ namespace Http
                 _ = Task.Run(async () =>
                 {
                     var networkStream = connection.GetStream();
-                    var requestText = await this.ReadRequest(networkStream);
+                    var RequestText = await this.ReadRequest(networkStream);
 
-                    Console.WriteLine(requestText);
+                    Console.WriteLine(RequestText);
 
-                    var request = Request.Parse(requestText);
+                    var request = Request.Parse(RequestText);
                     var response = this.routingTable.MatchRequest(request);
 
                     if (response.PreRenderAction != null)
@@ -74,7 +69,7 @@ namespace Http
         private async Task<string> ReadRequest(NetworkStream networkStream)
         {
             byte[] buffer=new byte[1024];
-            StringBuilder request=new StringBuilder();
+            StringBuilder Request=new StringBuilder();
             int totalBytes = 0;
             do
             {
@@ -86,22 +81,22 @@ namespace Http
                     throw new InvalidOperationException("Request is too large");
                 }
 
-                request.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+                Request.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
 
             } while (networkStream.DataAvailable);
 
-            return request.ToString();
+            return Request.ToString();
         }
 
-        private static void AddSession(Request request, Response response)
+        private static void AddSession(Request Request, Response response)
         {
-            var sessionExists = request.Session
+            var sessionExists = Request.Session
                 .ContainsKey(Session.SessionCurrentDateKey);
             if (!sessionExists) 
             {
-                request.Session[Session.SessionCurrentDateKey]=DateTime.Now.ToString();
+                Request.Session[Session.SessionCurrentDateKey]=DateTime.Now.ToString();
                 response.Cookies
-                    .Add(Session.SessionCookieName, request.Session.Id);
+                    .Add(Session.SessionCookieName, Request.Session.Id);
             }
         }
     }
