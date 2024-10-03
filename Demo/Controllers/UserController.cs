@@ -5,12 +5,7 @@ namespace Demo.Controllers
 {
     public class UserController : Controller
     {
-        private const string LoginForm = @"<form action='/Login' method='POST'>
-                                           Username: <input type='text' name='Username'/>
-                                           Password: <input type='password' name='Pasword'/>
-                                           <input type='submit' value='Log In'/>
-                                           </form>";
-
+        
         private const string Username = "user";
         private const string Password = "user123";
 
@@ -38,14 +33,11 @@ namespace Demo.Controllers
 
                 return Html(bodyText, cookies);
             }
-            else
-            {
-                bodyText = LoginForm;
-            }
-            return Html(bodyText);
+           
+            return Redirect("/Login");
         }
 
-        public Response Login() => Html(LoginForm);
+        public Response Login() => View();
 
         public Response Logout()
         {
@@ -54,7 +46,7 @@ namespace Demo.Controllers
            return Html("<h3>Logouted successfully!</h3>");
         }
 
-        internal Response GetUserData()
+        public Response GetUserData()
         {
             if (Request.Session.ContainsKey(Session.SessionUserKey))
             {
