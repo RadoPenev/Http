@@ -5,7 +5,6 @@ namespace Http.HTTP
     public class Response
     {
         public StatusCode StatusCode { get; init; }
-        public Action<Request,Response> PreRenderAction { get; set; }
         public HeaderCollection Headers { get; } = new HeaderCollection();
         public CookieCollection Cookies { get; } = new CookieCollection();
         public string Body { get; set; }
