@@ -11,18 +11,18 @@ namespace Http.Routing
             Func<TController,Response> controllerFunction) where TController : Controller
             => routingTable.Map(
                 Method.GET,
-                path, request=> controllerFunction(CreateController<TController>(request)));
+                path, Request=> controllerFunction(CreateController<TController>(Request)));
 
         public static IRoutingTable MapPost<TController>(
-            this RoutingTable routingTable,
+            this IRoutingTable routingTable,
             string path,
             Func<TController, Response> controllerFunction) where TController : Controller
             => routingTable.Map(
                 Method.POST,
-                path, request => controllerFunction(CreateController<TController>(request)));
+                path, Request => controllerFunction(CreateController<TController>(Request)));
 
 
-        private static TController CreateController<TController>(Request request)
-        => (TController)Activator.CreateInstance(typeof(TController), new[] {request});
+        private static TController CreateController<TController>(Request Request)
+        => (TController)Activator.CreateInstance(typeof(TController), new[] {Request});
     }
 }
