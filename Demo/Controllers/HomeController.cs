@@ -19,6 +19,8 @@ namespace Demo.Controllers
 
         public Response Index() => Text("Hello from the server!");
 
+        public Response Student(string name,int age)=>Text($"i am {name} and i am {age} years old");
+
         public Response Redirect() => Redirect("https://softuni.org");
 
         public Response Html()=> View();

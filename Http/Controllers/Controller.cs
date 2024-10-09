@@ -7,7 +7,7 @@ namespace Http.Controllers
     public class Controller
     {
 
-        protected Request Request {  get; private init; }
+        protected Request Request {  get; set; }
         public Controller(Request request)
         {
             this.Request = request;
