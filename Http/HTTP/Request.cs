@@ -1,4 +1,5 @@
 ﻿using Http.Common;
+using System.Threading.Tasks.Sources;
 using System.Web;
 
 namespace Http.HTTP
@@ -16,7 +17,7 @@ namespace Http.HTTP
         public Session Session { get; private set; }
 
         public IReadOnlyDictionary<string, string> Form { get; private set; }
-
+        public IReadOnlyDictionary<string, string> Query { get; private set; }
         public static IServiceCollection ServiceCollection { get; private set; }
 
         public static Request Parse(string request,IServiceCollection serviceCollection)
@@ -24,8 +25,9 @@ namespace Http.HTTP
             ServiceCollection = serviceCollection;
             var lines = request.Split("\r\n");
             var firstLine = lines.First().Split(' ');
-            var url = firstLine[1];
             var method = ParseMethod(firstLine[0]);
+            (string url, Dictionary<string, string> query) = ParseUrl(firstLine[1]);
+            
             HeaderCollection headers = ParseHeaders(lines.Skip(1));
             var cookies = ParseCookies(headers);
             var session=GetSession(cookies);
@@ -40,11 +42,39 @@ namespace Http.HTTP
                 Cookies = cookies,
                 Session=session,
                 Body = body,
-            Form = form
+                Form = form,
+                Query = query
         };
     }
 
-    private static CookieCollection ParseCookies(HeaderCollection headers)
+        private static (string url, Dictionary<string, string> query) ParseUrl(string queryString)
+        {
+            string url=String.Empty;
+            Dictionary<string, string> query = new();
+            var parts= queryString.Split("?",2);
+
+            if (parts.Length==1)
+            {
+                url = parts[0];
+            }
+            else
+            {
+                var queryParams= parts[1].Split("&");
+
+                foreach (var pair in queryParams)
+                {
+                    var param=pair.Split("=");
+                    if (param.Length == 2)
+                    {
+                        query.Add(param[0], param[1]);
+                    }
+                }
+            }
+
+            return (url,query);
+        }
+
+        private static CookieCollection ParseCookies(HeaderCollection headers)
         {
             var cookieCollection=new CookieCollection();
 
