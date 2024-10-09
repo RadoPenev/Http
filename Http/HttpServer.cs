@@ -1,4 +1,5 @@
-﻿using Http.HTTP;
+﻿using Http.Common;
+using Http.HTTP;
 using Http.Routing;
 using System.Net;
 using System.Net.Sockets;
@@ -12,12 +13,14 @@ namespace Http
         private readonly int port;
         private readonly TcpListener serverListener;
         private readonly RoutingTable routingTable;
+        public readonly IServiceCollection ServiceCollection;
         public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguration)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
             this.port = port;
             serverListener=new TcpListener(this.ipAddress,port);
             routingTableConfiguration(this.routingTable=new RoutingTable());
+            ServiceCollection = new ServiceCollection();
         }
 
         public HttpServer(int port,Action<IRoutingTable> routingTable):this("127.0.0.1",port,routingTable)
@@ -42,7 +45,7 @@ namespace Http
 
                     Console.WriteLine(RequestText);
 
-                    var request = Request.Parse(RequestText);
+                    var request = Request.Parse(RequestText,ServiceCollection);
                     var response = this.routingTable.MatchRequest(request);
 
                     

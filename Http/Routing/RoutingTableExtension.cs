@@ -1,5 +1,6 @@
 ﻿using Http.Controllers;
 using Http.HTTP;
+using System.Reflection;
 
 namespace Http.Routing
 {
@@ -24,5 +25,16 @@ namespace Http.Routing
 
         private static TController CreateController<TController>(Request Request)
         => (TController)Activator.CreateInstance(typeof(TController), new[] {Request});
+
+        private static Controller CreateController(Type controllerType, Request request)
+        {
+            var controller=(Controller)Request.ServiceCollection.CreateInstance(controllerType);
+
+            controllerType
+                .GetProperty("Request", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(controller,request);
+
+            return controller;
+        }
     }
 }

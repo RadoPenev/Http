@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using Http.Common;
+using System.Web;
 
 namespace Http.HTTP
 {
@@ -16,8 +17,11 @@ namespace Http.HTTP
 
         public IReadOnlyDictionary<string, string> Form { get; private set; }
 
-        public static Request Parse(string request)
+        public static IServiceCollection ServiceCollection { get; private set; }
+
+        public static Request Parse(string request,IServiceCollection serviceCollection)
         {
+            ServiceCollection = serviceCollection;
             var lines = request.Split("\r\n");
             var firstLine = lines.First().Split(' ');
             var url = firstLine[1];
